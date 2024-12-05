@@ -1,0 +1,12 @@
+[data]
+input_path = 'regulations.txt'
+output_path = 'extracted_requirements.json'
+
+[splitter]
+chunk_size = 2000
+chunk_overlap = 200
+separator = ['. ', '  ']
+
+[model]
+spacy_model = 'en_core_web_lg'
+top_n = 20

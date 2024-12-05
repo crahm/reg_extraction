@@ -1,0 +1,8 @@
+version: '0'
+
+services:
+ python:
+  build:
+   context: .
+  volumes:
+  - ./:/app

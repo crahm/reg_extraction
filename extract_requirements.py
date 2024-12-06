@@ -20,15 +20,15 @@ def rank_phrases(spacy_doc: spacy.tokens.doc.Doc, n: int = 30) -> str:
     """
     try:
         # check that textrank has been added to the pipeline before creating the document
-        assert hasattr(spacy_doc._, "phrases")
-    except AssertionError:
+        phrases = spacy_doc._.phrases
+    except AttributeError:
         print(
             "Document was created with a spacy pipeline with does not contain textrank!"
         )
         raise
     else:
         ranked_chunks = sorted(
-            [(phrase.text, phrase.rank) for phrase in spacy_doc._.phrases],
+            [(phrase.text, phrase.rank) for phrase in phrases],
             key=lambda x: x[1],
             reverse=True,
         )
@@ -97,6 +97,7 @@ def main():
                 "len_ratio": len(summary) / len(document.page_content),
             }
         )
+
     with open(settings.data["output_path"], "w") as f:
         json.dump(output, f, indent=4)
 

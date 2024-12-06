@@ -47,7 +47,9 @@ docker-compose up
 
 from within the project folder.
 The specified python version is 3.12.
-Once the container is built, the execution took around 25 seconds on my computer with the given parameter settings.
+Once the container is built, the execution took 
+around 25 seconds on my computer with the given 
+parameter settings.
 
 
 ## File Content

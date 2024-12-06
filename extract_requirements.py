@@ -18,13 +18,21 @@ def rank_phrases(spacy_doc: spacy.tokens.doc.Doc, n: int = 30) -> str:
     :param n: int top-n
     :return: str
     """
-
-    ranked_chunks = sorted(
-        [(phrase.text, phrase.rank) for phrase in spacy_doc._.phrases],
-        key=lambda x: x[1],
-        reverse=True,
-    )
-    return " ".join([chunk for chunk, _ in ranked_chunks][:n])
+    try:
+        # check that textrank has been added to the pipeline before creating the document
+        assert hasattr(spacy_doc._, "phrases")
+    except AssertionError:
+        print(
+            "Document was created with a spacy pipeline with does not contain textrank!"
+        )
+        raise
+    else:
+        ranked_chunks = sorted(
+            [(phrase.text, phrase.rank) for phrase in spacy_doc._.phrases],
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        return " ".join([chunk for chunk, _ in ranked_chunks][:n])
 
 
 def simulate_llm_summary(prompt: PromptTemplate, document: spacy.tokens.doc.Doc) -> str:

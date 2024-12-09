@@ -1,16 +1,18 @@
+"""main module"""
+
 import json
 import spacy
 import pytextrank
 from tqdm import tqdm
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader
-from langchain_community.llms import FakeListLLM
+from langchain_core.language_models.fake import FakeListLLM
 from langchain_core.prompts import PromptTemplate
 from langchain_core.documents.base import Document
 from config import settings
 
 
-def rank_phrases(spacy_doc: spacy.tokens.doc.Doc, n: int = 30) -> str:
+def rank_phrases(spacy_doc: spacy.tokens.Doc, n: int = 30) -> str:
     """
     Take a spacy document, use text_rank to score phrases and return the
     n top-ranked phrases concatenated as a string.
@@ -19,23 +21,23 @@ def rank_phrases(spacy_doc: spacy.tokens.doc.Doc, n: int = 30) -> str:
     :return: str
     """
     try:
-        # check that textrank has been added to the pipeline before creating the document
+        # check that textrank has been added to the pipeline
+        # before creating the document
         phrases = spacy_doc._.phrases
     except AttributeError:
         print(
-            "Document was created with a spacy pipeline with does not contain textrank!"
+            """
+            Document was created with a spacy pipeline
+            which does not contain textrank!
+            """
         )
         raise
-    else:
-        ranked_chunks = sorted(
-            [(phrase.text, phrase.rank) for phrase in phrases],
-            key=lambda x: x[1],
-            reverse=True,
-        )
-        return " ".join([chunk for chunk, _ in ranked_chunks][:n])
+
+    ranked_chunks = [phrase.text for phrase in phrases]
+    return " ".join(ranked_chunks[:n])
 
 
-def simulate_llm_summary(prompt: PromptTemplate, document: spacy.tokens.doc.Doc) -> str:
+def simulate_llm_summary(prompt: PromptTemplate, document: spacy.tokens.Doc) -> str:
     """
     Use a fake LLM to create a summary
     :param prompt: PromptTemplate LLM instruction
@@ -50,7 +52,8 @@ def simulate_llm_summary(prompt: PromptTemplate, document: spacy.tokens.doc.Doc)
 
 def load_documents() -> list[Document]:
     """
-    loads text file, splits recursively into chunks and returns and list of langchain documents
+    loads text file, splits recursively into chunks
+    and returns and list of langchain documents
     :return: list[Document]
     """
     text_loader = TextLoader(settings.data["input_path"])
@@ -70,7 +73,8 @@ def load_documents() -> list[Document]:
 def main():
     """
     Executor function loading models and documents,
-    iterating over each document, creating summaries and writing results to disc.
+    iterating over each document, creating summaries
+    and writing results to disc.
     :return:
     """
     prompt = PromptTemplate(
@@ -98,7 +102,7 @@ def main():
             }
         )
 
-    with open(settings.data["output_path"], "w") as f:
+    with open(settings.data["output_path"], "w", encoding="utf-8") as f:
         json.dump(output, f, indent=4)
 
 

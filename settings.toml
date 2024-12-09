@@ -10,3 +10,4 @@ separator = ['. ', '  ']
 [model]
 spacy_model = 'en_core_web_lg'
 top_n = 20
+prompt = 'Write a concise summary of the following text: {text}'

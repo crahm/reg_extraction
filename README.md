@@ -56,7 +56,7 @@ parameter settings.
 
 The project contains the following files:
 - README.md: Project description
-- extract_requirements.py: main exectubale
+- extract_requirements.py: main executable
 - requirements.txt: package list
 - Datafiles:
   - regulations.txt: input file

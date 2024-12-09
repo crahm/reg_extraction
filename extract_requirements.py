@@ -46,7 +46,7 @@ def simulate_llm_summary(prompt: PromptTemplate, document: spacy.tokens.Doc) -> 
     """
     llm = FakeListLLM(responses=[rank_phrases(document, n=settings.model["top_n"])])
     chain = prompt | llm
-    summary = chain.invoke(document.text)
+    summary = chain.invoke({"text": document.text})
     return summary
 
 
@@ -58,7 +58,6 @@ def load_documents() -> list[Document]:
     """
     text_loader = TextLoader(settings.data["input_path"])
     text = text_loader.load()
-
     text_splitter = RecursiveCharacterTextSplitter(
         separators=settings.splitter["separator"],
         chunk_size=settings.splitter["chunk_size"],
@@ -78,14 +77,11 @@ def main():
     :return:
     """
     prompt = PromptTemplate(
-        template="""
-            Write a concise summary of the following {text}.
-            """,
+        template=settings.model["prompt"],
         input_variables=["text"],
     )
     nlp = spacy.load(settings.model["spacy_model"])
     nlp.add_pipe("textrank")
-
     documents = load_documents()
     output = []
     for i, document in tqdm(enumerate(documents)):

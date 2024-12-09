@@ -56,8 +56,27 @@ def load_documents() -> list[Document]:
     and returns and list of langchain documents
     :return: list[Document]
     """
-    text_loader = TextLoader(settings.data["input_path"])
-    text = text_loader.load()
+    try:
+        text_loader = TextLoader(settings.data["input_path"])
+        text = text_loader.load()
+    except FileNotFoundError:
+        print(f"""Error: {settings.data["input_path"]} was not found.""")
+        raise
+    except PermissionError:
+        print(
+            f"""Error: Insufficient permissions to read {settings.data["input_path"]}."""
+        )
+        raise
+    except OSError as e:
+        print(
+            f"""An OS error occurred while loading {settings.data["input_path"]}: {e}"""
+        )
+        raise
+    except Exception as e:
+        print(
+            f"""An unexpected error occurred while loading {settings.data["input_path"]}: {e}"""
+        )
+        raise
     text_splitter = RecursiveCharacterTextSplitter(
         separators=settings.splitter["separator"],
         chunk_size=settings.splitter["chunk_size"],
@@ -87,19 +106,40 @@ def main():
     for i, document in tqdm(enumerate(documents)):
         doc = nlp(document.page_content)
         summary = simulate_llm_summary(prompt, doc)
+
+        doc_len = len(document.page_content)
+        summary_len = len(summary)
+        if doc_len:
+            len_ratio = summary_len / doc_len
+        else:
+            len_ratio = 0
         output.append(
             {
                 "section_number": i,
                 "text": document.page_content,
                 "summary": summary,
-                "text_len": len(document.page_content),
-                "summary_len": len(summary),
-                "len_ratio": len(summary) / len(document.page_content),
+                "text_len": doc_len,
+                "summary_len": summary_len,
+                "len_ratio": len_ratio,
             }
         )
 
-    with open(settings.data["output_path"], "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=4)
+    try:
+        with open(settings.data["output_path"], "w", encoding="utf-8") as f:
+            json.dump(output, f, indent=4)
+    except FileNotFoundError:
+        print(
+            f"""Error: The output directory for {settings.data["output_path"]} does not exist."""
+        )
+        raise
+    except PermissionError:
+        print(
+            f"""Error: You do not have permission to write to {settings.data["output_path"]}."""
+        )
+        raise
+    except OSError as e:
+        print(f"An OS error occurred: {e}")
+        raise
 
 
 if __name__ == "__main__":
